@@ -1,0 +1,21 @@
+<h2>Available Offers</h2>
+
+<ul>
+{% for offer in offers %}
+    <li>
+        {{ offer.filename }}
+
+        <a href="{% url 'view_offer' offer.id %}">View</a>
+
+        {% if request.user.role == "ADMIN" and not offer.is_verified %}
+            | <a href="{% url 'verify_offer' offer.id %}">Verify</a>
+        {% endif %}
+
+        {% if offer.is_verified %}
+            <strong>✔ Verified</strong>
+        {% else %}
+            <strong>⏳ Pending</strong>
+        {% endif %}
+    </li>
+{% endfor %}
+</ul>
