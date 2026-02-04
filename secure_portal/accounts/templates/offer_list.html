@@ -1,21 +1,97 @@
-<h2>Available Offers</h2>
+{% extends 'base.html' %}
+{% block title %}Offers - Secure Portal{% endblock %}
 
-<ul>
-{% for offer in offers %}
-    <li>
-        {{ offer.filename }}
+{% block content %}
+<div class="page-header">
+    <h2>Internship Offers</h2>
+    <p>Securely managed documents</p>
+</div>
 
-        <a href="{% url 'view_offer' offer.id %}">View</a>
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Document Info</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for offer in offers %}
+            <tr>
+                <td>
+                    <div style="display: flex; align-items: center; gap: 0.8rem;">
+                        <span style="font-size: 1.5rem;">📄</span>
+                        <div>
+                            <strong style="display: block; color: var(--text-main);">{{ offer.filename }}</strong>
+                            <span style="font-size: 0.8rem; color: var(--text-muted);">From: {{ offer.company.username }}</span>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        {% if offer.is_verified %}
+                            <span style="color: var(--success); font-weight: 600; display: inline-flex; align-items: center; gap: 4px; font-size: 0.85rem;">
+                                ✔ Verified
+                            </span>
+                        {% else %}
+                            <span style="color: var(--warning); font-weight: 600; display: inline-flex; align-items: center; gap: 4px; font-size: 0.85rem;">
+                                ⏳ Pending Verify
+                            </span>
+                        {% endif %}
 
-        {% if request.user.role == "ADMIN" and not offer.is_verified %}
-            | <a href="{% url 'verify_offer' offer.id %}">Verify</a>
-        {% endif %}
+                        {% if offer.accepted_students.exists %}
+                             <span style="color: var(--primary); font-weight: 600; font-size: 0.85rem;">
+                                🤝 Accepted by: 
+                                {% for student in offer.accepted_students.all %}
+                                    {{ student.username }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                             </span>
+                        {% else %}
+                             <span style="font-size: 0.8rem; color: var(--text-muted);">
+                                Pending for: 
+                                {% for student in offer.students.all %}
+                                    {{ student.username }}{% if not forloop.last %}, {% endif %}
+                                {% empty %}
+                                    None assigned
+                                {% endfor %}
+                             </span>
+                        {% endif %}
+                    </div>
+                </td>
+                <td>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <a href="{% url 'view_offer' offer.id %}" class="btn btn-secondary" style="padding: 0.25rem 0.75rem; font-size: 0.85rem;">View</a>
+                        
+                        <!-- Verify Action (Admin) -->
+                        {% if request.user.role == "ADMIN" and not offer.is_verified %}
+                            <a href="{% url 'verify_offer' offer.id %}" class="btn btn-primary" style="padding: 0.25rem 0.75rem; font-size: 0.85rem;">Verify</a>
+                        {% endif %}
 
-        {% if offer.is_verified %}
-            <strong>✔ Verified</strong>
-        {% else %}
-            <strong>⏳ Pending</strong>
-        {% endif %}
-    </li>
-{% endfor %}
-</ul>
+                        <!-- Accept Action (Student) -->
+                        {% if request.user.role == "STUDENT" and request.user not in offer.accepted_students.all %}
+                            <a href="{% url 'accept_offer' offer.id %}" class="btn btn-primary" style="padding: 0.25rem 0.75rem; font-size: 0.85rem; background-color: var(--success); border: none;">Accept</a>
+                        {% endif %}
+
+                        <!-- Delete Action (Company who owns it OR Admin) -->
+                        {% if request.user.role == "ADMIN" or request.user == offer.company %}
+                            <a href="{% url 'delete_offer' offer.id %}" class="btn btn-primary" style="padding: 0.25rem 0.75rem; font-size: 0.85rem; background-color: var(--danger); border: none;" onclick="return confirm('Are you sure you want to delete {{ offer.filename }}? This action cannot be undone.');">Delete</a>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                    No offers found available for your account.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div style="margin-top: 2rem; text-align: center;">
+    <a href="{% url 'dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+</div>
+{% endblock %}

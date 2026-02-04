@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Confirm Deletion - Secure Portal{% endblock %}
+
+{% block content %}
+<div class="auth-container" style="max-width: 600px;">
+    <div class="card-glass" style="border-color: var(--danger);">
+        <div class="page-header">
+            <h2 style="color: var(--danger);">Confirm Deletion Approval</h2>
+            <p>Admin Authorization Required</p>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <p>Admin <strong>{{ del_req.requested_by.username }}</strong> has requested to delete the following document:</p>
+            <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: var(--radius-sm); margin: 1rem 0;">
+                <h3 style="margin: 0;">{{ del_req.offer.filename }}</h3>
+                <p style="margin: 0.5rem 0 0; font-size: 0.85rem; color: var(--text-muted);">Uploaded by: {{ del_req.offer.company.username }}</p>
+            </div>
+            <p style="font-size: 0.9rem; color: var(--danger);">Warning: This action is permanent and cannot be undone.</p>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" name="action" value="approve" class="btn btn-primary" style="flex: 1; background-color: var(--danger); border-color: var(--danger);">
+                    ✅ Accept Deletion
+                </button>
+                <button type="submit" name="action" value="reject" class="btn btn-secondary" style="flex: 1;">
+                    ❌ Reject Request
+                </button>
+            </div>
+        </form>
+
+        <div style="text-align: center; margin-top: 1.5rem;">
+            <a href="{% url 'notifications' %}" style="color: var(--text-muted);">Back to Notifications</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

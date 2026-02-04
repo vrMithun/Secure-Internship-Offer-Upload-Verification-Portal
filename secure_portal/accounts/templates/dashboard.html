@@ -1,3 +1,78 @@
-<h2>Dashboard</h2>
-<p>Welcome {{ request.user.username }}</p>
-<p>Role: {{ request.user.role }}</p>
+{% extends 'base.html' %}
+{% block title %}Dashboard - Secure Portal{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Dashboard</h2>
+    <p>Manage your secure documents and profile</p>
+</div>
+
+<!-- Profile Section (Top Corner/Top Area as requested) -->
+<div class="row" style="margin-bottom: 2rem;">
+    <div class="card-glass" style="padding: 1.5rem; display: flex; align-items: center; justify-content: space-between; border-color: var(--primary);">
+        <div style="display: flex; align-items: center; gap: 1.5rem;">
+            <div style="background: var(--bg-card-hover); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;">
+                👤
+            </div>
+            <div>
+                <h3 style="margin: 0; font-size: 1.2rem;">{{ request.user.username }}</h3>
+                <p style="margin: 0; font-size: 0.9rem; color: var(--text-muted);">{{ request.user.email }}</p>
+            </div>
+        </div>
+        <div style="text-align: right;">
+            <span class="btn btn-secondary" style="pointer-events: none; font-size: 0.85rem; padding: 0.4rem 0.8rem;">
+                Role: <strong style="color: var(--primary);">{{ request.user.role }}</strong>
+            </span>
+            <p style="margin: 0.5rem 0 0; font-size: 0.8rem; color: var(--text-muted);">
+                Member since: {{ request.user.date_joined|date:"M d, Y" }}
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <!-- Common Action: View Offers -->
+    <div class="dashboard-card">
+        <div class="card-icon">📂</div>
+        <h3>My Offers</h3>
+        <p>Access your secure internship offer letters and documents.</p>
+        <div class="card-action">
+            <a href="{% url 'list_offers' %}" class="btn btn-primary btn-block">View Offers</a>
+        </div>
+    </div>
+
+    <!-- Company Role Actions -->
+    {% if request.user.role == "COMPANY" %}
+    <div class="dashboard-card">
+        <div class="card-icon">📤</div>
+        <h3>Upload Offer</h3>
+        <p>Securely upload and sign new internship offers for students.</p>
+        <div class="card-action">
+            <a href="{% url 'upload_offer' %}" class="btn btn-primary btn-block">Upload New Offer</a>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Admin Role Actions -->
+    {% if request.user.role == "ADMIN" %}
+    <div class="dashboard-card">
+        <div class="card-icon">🛡️</div>
+        <h3>Verification Center</h3>
+        <p>Review and verify the authenticity of uploaded offers.</p>
+        <div class="card-action">
+            <a href="{% url 'list_offers' %}" class="btn btn-primary btn-block">Pending Verifications</a>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Security/Audit Log Placeholder (Instead of Profile Card which is now at top) -->
+    <div class="dashboard-card">
+        <div class="card-icon">🔐</div>
+        <h3>Security Log</h3>
+        <p>Recent login and access activity on your account.</p>
+        <div class="card-action">
+            <a href="{% url 'activity_log' %}" class="btn btn-secondary btn-block">View Logs</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Upload Successful - Secure Portal{% endblock %}
+
+{% block content %}
+<div class="auth-container" style="max-width: 600px;">
+    <div class="card-glass" style="border-color: var(--primary); text-align: center;">
+        <div style="font-size: 5rem; color: var(--primary); margin-bottom: 1rem;">📤</div>
+        <h2 style="color: var(--primary);">Upload Complete</h2>
+        <p style="margin-bottom: 2rem;">The internship offer has been securely signed, encrypted, and distributed.</p>
+        
+        <div style="display: flex; gap: 1rem; flex-direction: column;">
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary btn-block">Return to Dashboard</a>
+            <a href="{% url 'upload_offer' %}" class="btn btn-secondary btn-block">Upload Another File</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

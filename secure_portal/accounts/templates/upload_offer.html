@@ -1,19 +1,147 @@
-<h2>Secure Offer Upload</h2>
+{% extends 'base.html' %}
+{% block title %}Upload Offer - Secure Portal{% endblock %}
 
-<form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
+{% block content %}
+<div class="auth-container" style="max-width: 600px;">
+    <div class="card-glass">
+        <div class="page-header">
+            <h2>Upload Offer</h2>
+            <p>Securely encrypt and store documents</p>
+        </div>
 
-    <input type="file" name="offer" required><br><br>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
 
-    <label>Select Students:</label><br>
-    <select name="student_ids" multiple required>
-        {% for s in students %}
-            <option value="{{ s.id }}">{{ s.username }}</option>
-        {% endfor %}
-    </select><br><br>
+            <div class="form-group">
+                <label for="id_offer" class="form-label">Offer Letter (PDF)</label>
+                <div style="border: 2px dashed var(--border); padding: 2rem; border-radius: var(--radius-sm); text-align: center; background: rgba(0,0,0,0.2); position: relative;" id="drop-zone">
+                    <input type="file" name="offer" id="id_offer" accept=".pdf" required class="form-control" style="opacity: 0; position: absolute; top:0; left:0; width:100%; height:100%; cursor: pointer;">
+                    <span style="font-size: 2rem;" id="file-icon">📄</span>
+                    <p style="margin-top: 1rem; color: var(--text-main); font-weight: 500;" id="file-label">Click to select file</p>
+                    <p style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--text-muted);" id="file-subtext">PDF files only, encrypted with AES-256.</p>
+                    
+                    <!-- New controls -->
+                    <div id="file-controls" style="display: none; margin-top: 1rem; gap: 0.5rem; justify-content: center; position: relative; z-index: 10;">
+                        <button type="button" id="btn-toggle-preview" class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">👁 View Preview</button>
+                        <button type="button" id="btn-remove-file" class="btn btn-primary" style="padding: 0.3rem 0.8rem; font-size: 0.8rem; background-color: var(--danger); border: none;">❌ Remove</button>
+                    </div>
+                </div>
+            </div>
 
-    <button type="submit">Upload Securely</button>
-</form>
+            <!-- Preview Container (Hidden by default) -->
+            <div id="preview-container" style="display: none; margin-bottom: 1.5rem;">
+                <label class="form-label">Document Preview</label>
+                <div style="background: rgba(0,0,0,0.3); border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border);">
+                    <embed id="pdf-preview" src="" type="application/pdf" width="100%" height="500px">
+                </div>
+            </div>
 
-{% if msg %}<p>{{ msg }}</p>{% endif %}
+            <div class="form-group">
+                <label class="form-label">Assign to Student(s)</label>
+                <div style="max-height: 200px; overflow-y: auto; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1rem;">
+                    {% for s in students %}
+                        <label style="display: flex; align-items: center; gap: 0.8rem; padding: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: background 0.2s;">
+                            <!-- Using checkboxes but styled to look friendly -->
+                            <input type="checkbox" name="student_ids" value="{{ s.id }}" style="width: 1.2rem; height: 1.2rem; accent-color: var(--primary);">
+                            <div>
+                                <strong style="display: block; color: var(--text-main);">{{ s.username }}</strong>
+                                <span style="font-size: 0.85rem; color: var(--text-muted);">{{ s.email }}</span>
+                            </div>
+                        </label>
+                    {% empty %}
+                         <p style="text-align: center; color: var(--text-muted);">No students registered yet.</p>
+                    {% endfor %}
+                </div>
+                <p style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--text-muted);">Select one or more students to grant access.</p>
+            </div>
 
+            <button type="submit" class="btn btn-primary btn-block">
+                <span style="margin-right: 8px;">🔒</span> Encrypt & Upload
+            </button>
+        </form>
+        
+        <div style="text-align: center; margin-top: 1.5rem;">
+            <a href="{% url 'dashboard' %}" style="color: var(--text-muted);">Cancel</a>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    const fileInput = document.getElementById('id_offer');
+    const label = document.getElementById('file-label');
+    const subtext = document.getElementById('file-subtext');
+    const icon = document.getElementById('file-icon');
+    const previewContainer = document.getElementById('preview-container');
+    const pdfPreview = document.getElementById('pdf-preview');
+    const dropZone = document.getElementById('drop-zone');
+    const fileControls = document.getElementById('file-controls');
+    const btnToggle = document.getElementById('btn-toggle-preview');
+    const btnRemove = document.getElementById('btn-remove-file');
+
+    let objectUrl = null;
+
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+
+        if (file) {
+            // Update UI with filename
+            label.textContent = file.name;
+            label.style.color = 'var(--primary)';
+            subtext.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+            icon.textContent = '✅';
+            dropZone.style.borderColor = 'var(--primary)';
+            dropZone.style.background = 'rgba(var(--primary-rgb), 0.1)';
+            fileControls.style.display = 'flex';
+
+            // Generate Preview URL
+            if (file.type === 'application/pdf') {
+                if (objectUrl) URL.revokeObjectURL(objectUrl);
+                objectUrl = URL.createObjectURL(file);
+                pdfPreview.src = objectUrl;
+            } else {
+                alert('Please select a valid PDF file.');
+                resetFileInput();
+            }
+        } else {
+            resetFileInput();
+        }
+    });
+
+    btnToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (previewContainer.style.display === 'none') {
+            previewContainer.style.display = 'block';
+            btnToggle.textContent = '🙈 Hide Preview';
+            // Scroll to preview
+            previewContainer.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            previewContainer.style.display = 'none';
+            btnToggle.textContent = '👁 View Preview';
+        }
+    });
+
+    btnRemove.addEventListener('click', function(e) {
+        e.stopPropagation();
+        resetFileInput();
+    });
+
+    function resetFileInput() {
+        fileInput.value = '';
+        label.textContent = 'Click to select file';
+        label.style.color = 'var(--text-main)';
+        subtext.textContent = 'PDF files only, encrypted with AES-256.';
+        icon.textContent = '📄';
+        previewContainer.style.display = 'none';
+        dropZone.style.borderColor = 'var(--border)';
+        dropZone.style.background = 'rgba(0,0,0,0.2)';
+        fileControls.style.display = 'none';
+        btnToggle.textContent = '👁 View Preview';
+        if (objectUrl) {
+            URL.revokeObjectURL(objectUrl);
+            objectUrl = null;
+        }
+    }
+</script>
+{% endblock %}
+{% endblock %}

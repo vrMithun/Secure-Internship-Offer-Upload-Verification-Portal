@@ -1,1 +1,42 @@
-<h2>Verify Offer (Admin Only)</h2>
+{% extends 'base.html' %}
+{% block title %}Verify Offer - Secure Portal{% endblock %}
+
+{% block content %}
+<div class="auth-container" style="max-width: 600px;">
+    <div class="card-glass" style="border-color: var(--warning);">
+        <div class="page-header">
+            <h2 style="color: var(--warning);">Verify Document</h2>
+            <p>Admin Action Required</p>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <p>You are about to verify the authenticity of the following document:</p>
+            <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: var(--radius-sm); margin: 1rem 0;">
+                <h3 style="margin: 0;">{{ offer.filename }}</h3>
+            </div>
+            <p style="font-size: 0.9rem;">This action will generate a digital signature hash and mark the document as valid for all parties.</p>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label style="display: flex; align-items: start; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" required style="margin-top: 5px;">
+                    <span style="font-size: 0.9rem; color: var(--text-muted);">
+                        I confirm that I have validated the source and integrity of this document according to university protocols.
+                    </span>
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block" style="background-color: var(--warning); color: #000; box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);">
+                ✅ Confirm & Verify
+            </button>
+        </form>
+
+        <div style="text-align: center; margin-top: 1.5rem;">
+            <a href="{% url 'list_offers' %}" style="color: var(--text-muted);">Cancel</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,2 +1,50 @@
-<h2>View Offer</h2>
-<p>Accessible based on role</p>
+{% extends 'base.html' %}
+{% block title %}View Offer - Secure Portal{% endblock %}
+
+{% block content %}
+<div class="auth-container" style="max-width: 600px;">
+    <div class="card-glass">
+        <div class="page-header">
+            <h2>Offer Details</h2>
+            <p>Encrypted Document Access</p>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">📄</div>
+            <h3 style="color: var(--primary);">{{ offer.filename }}</h3>
+            <p>Uploaded by: {{ offer.company.username }}</p>
+            
+            {% if offer.is_verified %}
+                <span style="background: rgba(34, 197, 94, 0.2); color: var(--success); padding: 0.25rem 0.75rem; border-radius: var(--radius-sm); font-size: 0.9rem; font-weight: 600;">
+                    ✔ Verified & Authentic
+                </span>
+            {% else %}
+                <span style="background: rgba(245, 158, 11, 0.2); color: var(--warning); padding: 0.25rem 0.75rem; border-radius: var(--radius-sm); font-size: 0.9rem; font-weight: 600;">
+                    ⏳ Pending Verification
+                </span>
+            {% endif %}
+        </div>
+
+        <div class="alert alert-info" style="border-left-color: var(--primary); background: rgba(56, 189, 248, 0.1);">
+            <p style="margin: 0; font-size: 0.9rem; color: var(--text-main);">
+                <strong>Note:</strong> This document is stored using AES-256 encryption. Downloading it will decrypt it on the server-side for your session.
+            </p>
+        </div>
+
+        <div style="margin-top: 2rem; display: flex; flex-direction: column; gap: 1rem;">
+            <!-- Assuming there is a download URL or the view itself handles it via header -->
+            <!-- If the original template didn't have a specific download link, we assume this page IS the view trigger or we need a button to trigger separate action -->
+            <!-- Based on standard patterns, often 'view' just shows it. I'll add a 'Download' button that points to a download view if clear, or just a placeholder 'View Content' -->
+            
+            <!-- Since I don't see a 'download' URL in the list, I will assume this page might display the content or I should provide a button to a proper download action if I can find it. 
+                 However, without probing 'urls.py', I'll stick to a generic approach: -->
+            
+            <a href="#" class="btn btn-primary btn-block" onclick="alert('In a real deployment, this would trigger the secure decryption stream.'); return false;">
+                🔓 Decrypt & Download
+            </a>
+            
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary btn-block">Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

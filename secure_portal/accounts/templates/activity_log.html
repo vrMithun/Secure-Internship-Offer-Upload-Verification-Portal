@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Activity Log - Secure Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Dot Colors */
+    .dot-upload { background: var(--primary); box-shadow: 0 0 10px var(--primary-glow); }
+    .dot-verify { background: var(--success); box-shadow: 0 0 10px rgba(34, 197, 94, 0.4); }
+    .dot-delete { background: var(--danger); box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
+    .dot-accept { background: var(--success); box-shadow: 0 0 10px rgba(34, 197, 94, 0.4); }
+    .dot-default { background: var(--text-muted); }
+    
+    .timeline-dot {
+        position: absolute; 
+        left: -2.4rem; 
+        top: 0.2rem; 
+        width: 12px; 
+        height: 12px; 
+        border-radius: 50%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>System Activity Log</h2>
+    <p>Audit trail of all secure actions</p>
+</div>
+
+<div class="auth-container" style="max-width: 800px;">
+    <div class="card-glass">
+        
+        <div style="position: relative; padding-left: 2rem;">
+            <!-- Timeline Line -->
+            <div style="position: absolute; left: 15px; top: 0; bottom: 0; width: 2px; background: var(--border);"></div>
+
+            {% for log in logs %}
+            <div style="position: relative; margin-bottom: 2rem; padding-left: 1rem;">
+                <!-- Timeline Dot with Logic -->
+                <div class="timeline-dot 
+                    {% if log.action == 'UPLOAD' %}dot-upload
+                    {% elif log.action == 'VERIFY_SUCCESS' %}dot-verify
+                    {% elif log.action == 'DELETE' %}dot-delete
+                    {% elif log.action == 'ACCEPT' %}dot-accept
+                    {% else %}dot-default{% endif %}">
+                </div>
+
+                <div style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                        <span style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;">
+                            {{ log.action }}
+                        </span>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">
+                            {{ log.timestamp|date:"M d, Y H:i" }}
+                        </span>
+                    </div>
+                    
+                    <p style="margin: 0; font-size: 0.95rem; color: var(--text-muted);">
+                        <strong style="color: var(--primary);">{{ log.actor.username }}</strong> ({{ log.actor.role }}) - {{ log.details }}
+                    </p>
+                </div>
+            </div>
+            {% empty %}
+                <p style="text-align: center; color: var(--text-muted);">No activity recorded yet.</p>
+            {% endfor %}
+        </div>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

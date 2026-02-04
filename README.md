@@ -1,179 +1,105 @@
 # 🔐 Secure Internship Offer Upload & Verification Portal
 
-A secure, role-based web application designed to **prevent fake internship offer letters** by ensuring **authentication, authorization, encryption, hashing, digital signatures, and secure verification**.
-
-This project is developed as part of **23CSE313 – Foundations of Cyber Security Lab Evaluation** at  
-**Amrita Vishwa Vidyapeetham – Amrita School of Computing**.
+A robust, role-based platform designed to combat internship fraud. This portal ensures the **authenticity, confidentiality, and integrity** of offer letters through advanced cryptography, multi-admin oversight, and a "First-Come, First-Served" multi-student acceptance model.
 
 ---
 
-## 📌 Problem Statement
+## 📌 Project Context
+Developed for **23CSE313 – Foundations of Cyber Security**, this project demonstrates how industrial-grade security principles can solve real-world problems like fake internship documents.
 
-Fake internship offer letters are increasingly used to scam students.  
-There is no centralized and secure mechanism to:
+## 🌟 Key Features
 
-- Upload internship offers securely
-- Verify authenticity and integrity of offers
-- Prevent unauthorized access or tampering
-- Allow third-party verification without exposing sensitive data
+### 1. Hybrid Encryption (Digital Envelope)
+The system uses a **Hybrid Cryptography** model:
+- **AES-256-CFB**: Used for fast symmetric encryption of the document itself.
+- **RSA-OAEP (2048-bit)**: Used for asymmetric "key wrapping." The random AES key for each document is encrypted using the Portal's Master Public Key.
+- **Why?**: This combines the speed of symmetric encryption with the secure key management of asymmetric encryption.
 
----
+### 2. Multi-Admin Approval Workflow
+To prevent **Insider Threats**, critical actions are never immediate:
+- **Deletion Requests**: When an admin wants to delete a file, it must be approved by *another* admin.
+- **Verification Requests**: Offer verification follows the same "Four-Eyes Principle," requiring a second admin's confirmation.
+- **Explicit Confirmation**: Approvals require a manual "Accept/Reject" choice, preventing accidental or automated clicks from notifications.
 
-## 🎯 Solution Overview
+### 3. Smart Acceptance Model
+- **Broadcast Offers**: Companies can assign one offer to multiple students.
+- **Independent Acceptance**: Unlike the "First-Come" model, this system allows **multiple students** to accept the same offer independently.
+- **Transparent Status**: The Offer List shows the names of all students who have accepted, and for pending offers, it shows who it is available for.
 
-The **Secure Internship Offer Upload & Verification Portal** provides:
-
-- Secure registration and login using **NIST-compliant authentication**
-- Role-based access control for **Students, Companies, and University Admins**
-- **Encrypted storage** of offer letters
-- **Digital signatures** for authenticity and non-repudiation
-- **QR / encoded verification** for third-party validation
-
----
-
-## 👥 User Roles
-
-### 1. Student
-- Register and login securely
-- View only their own internship offers
-- Verify offer authenticity
-
-### 2. Company (HR)
-- Upload internship offer letters
-- Digitally sign offers before submission
-- View uploaded offers
-
-### 3. University Admin
-- Verify authenticity of uploaded offers
-- Validate digital signatures
-- Prevent fraudulent documents
+### 4. Zero-Trust Access Control
+- **Students**: Can only view and accept offers specifically assigned to them.
+- **Companies**: Can only manage offers they uploaded.
+- **Admins**: Can perform verification and deletion through the multi-admin authorization flow.
 
 ---
 
-## 🔐 Security Architecture
+## 🛡️ Security Implementation (Rubric Map)
 
-The application integrates **multiple security layers**:
+### 1️⃣ Authentication (OTP Secured)
+- **NIST-Compliant**: Passwords undergo salted hashing.
+- **Email MFA**: A 6-digit OTP is required for every login, sent to the user's console/email.
 
-| Layer | Purpose |
-|------|--------|
-| Authentication | Verify user identity |
-| Authorization | Control access to resources |
-| Encryption | Protect data confidentiality |
-| Hashing | Secure credential storage |
-| Digital Signature | Ensure integrity & authenticity |
-| Encoding | Safe data transmission |
+### 2️⃣ Authorization (Access Control Matrix)
+- Permissions are enforced via custom Django decorators and a dynamic `RolePermission` model.
+- **Rule**: Deletion is strictly blocked once at least one student has accepted the offer.
 
----
-
-## 🛡️ Security Features (Mapped to Evaluation Rubric)
-
-### 1️⃣ Authentication (3 Marks)
-
-#### Single-Factor Authentication
-- Username (Email) + Password
-- Passwords stored using **salted hashing** (bcrypt / PBKDF2 / Argon2)
-
-#### Multi-Factor Authentication
-- Password + **Email-based OTP**
-- Time-bound OTP validation
-- Complies with **NIST SP 800-63-2 E-Authentication Model**
+### 3️⃣ Encryption Trace (Evaluation View)
+The Admin panel includes a **Cryptographic Evaluation Trace** for every document:
+- **Phase 1**: Shows AES details (IV, Ciphertext snippet).
+- **Phase 2**: Shows RSA Key Wrapping (Digital Envelope).
+- **Phase 3**: Simulates decryption to prove the "System Private Key" is required to read the data.
 
 ---
 
-### 2️⃣ Authorization – Access Control (3 Marks)
+## 🚀 Quick Start Guide
 
-**Access Control Model Used:** Access Control Matrix
+### 1. Prerequisites
+- Python 3.10+
+- Virtual Environment
 
-| Subject / Object | Upload Offer | View Offer | Verify Offer |
-|------------------|-------------|------------|-------------|
-| Student | ❌ | ✅ (Own only) | ❌ |
-| Company HR | ✅ | ✅ (Uploaded) | ❌ |
-| University Admin | ❌ | ✅ (All) | ✅ |
+### 2. Installation
+```bash
+# Clone the repository
+git clone <repo-url>
+cd Secure-Internship-Offer-Upload-Verification-Portal
 
-- Permissions enforced programmatically using role-based middleware
-- Unauthorized actions are blocked at backend level
+# Create and activate venv
+python -m venv venv
+source venv/bin/activate  # venv\Scripts\activate on Windows
 
----
+# Install dependencies
+pip install django cryptography
+```
 
-### 3️⃣ Encryption (3 Marks)
+### 3. Database & System Setup
+```bash
+# Apply migrations
+python manage.py migrate
 
-#### Key Exchange Mechanism
-- **Hybrid Cryptography**
-  - AES for file encryption
-  - RSA for secure AES key exchange
+# Initialize the ACL (Access Control List)
+python populate_acl.py
 
-#### Encryption & Decryption
-- Internship offer letters encrypted **before database storage**
-- Decryption allowed only after authentication and authorization
+# Create a Superuser
+python manage.py createsuperuser
+```
 
----
-
-### 4️⃣ Hashing & Digital Signature (3 Marks)
-
-#### Hashing with Salt
-- Passwords hashed using secure algorithms with salt
-- Protects against rainbow table and brute-force attacks
-
-#### Digital Signature using Hash
-- Offer letter hash generated using **SHA-256**
-- Hash signed using **company’s private key**
-- Verification using corresponding public key ensures:
-  - Integrity
-  - Authenticity
-  - Non-repudiation
+### 4. Run the Portal
+```bash
+python manage.py runserver
+```
+> **Note**: OTPs will be printed in the terminal for development.
 
 ---
 
-### 5️⃣ Encoding Techniques (1 Mark)
-
-- **Base64 Encoding**
-  - Used for encrypted data and digital signatures
-  - Enables safe transmission via APIs and JSON payloads
-
----
-
-## ⚠️ Security Risks & Mitigations
-
-| Threat | Mitigation |
-|------|-----------|
-| Password brute-force | Rate limiting + strong hashing |
-| Unauthorized access | Role-based access control |
-| Data tampering | Digital signatures |
-| Replay attacks | OTP expiration |
-| Data leakage | AES encryption at rest |
-
----
-
-## 🧪 Technologies Used
-
-- Backend: Secure API-based architecture
-- Cryptography: AES, RSA, SHA-256
-- Authentication: Password + OTP
-- Encoding: Base64
-- Database: Encrypted document storage
-
----
-
-## **Why this project?**  
-> Internship fraud is a real-world problem affecting students. This project demonstrates how foundational cybersecurity concepts can be applied cohesively to solve a practical security issue.
-
-## **What makes it secure?**  
-> Security is enforced at every layer — identity verification, access control, encryption, hashing, and integrity verification.
-
----
-
-## ✅ Conclusion
-
-This project successfully integrates all core cybersecurity concepts required by the syllabus into a **realistic, original, and secure application**, making it suitable for both **academic evaluation and real-world deployment**.
+## 📂 Project Structure
+- `accounts/models.py`: Core models for Users, Offers, Requests, and Notifications.
+- `accounts/crypto_utils.py`: The security engine (AES/RSA/Signatures).
+- `accounts/views.py`: Business logic including the Multi-Admin approval flow.
+- `templates/`: Modern, glassmorphism-inspired UI components.
 
 ---
 
 ## 📚 Course Information
-
-**Course Code:** 23CSE313  
-**Course Name:** Foundations of Cyber Security  
+**Course:** 23CSE313 – Foundations of Cyber Security  
 **Institution:** Amrita Vishwa Vidyapeetham  
 **Department:** Computer Science and Engineering
-
----
-

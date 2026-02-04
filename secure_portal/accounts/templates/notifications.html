@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Notifications - Secure Portal{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Notifications</h2>
+    <p>Stay updated on actions and requests</p>
+</div>
+
+<div class="card-glass" style="padding: 1rem;">
+    {% if notifications %}
+        <div class="notification-list">
+            {% for notification in notifications %}
+                <div class="notification-item {% if not notification.is_read %}unread{% endif %}" style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <p class="notification-message {% if not notification.is_read %}bold{% endif %}" style="margin: 0;">
+                            {{ notification.message }}
+                        </p>
+                        <small style="color: var(--text-muted);">{{ notification.created_at|timesince }} ago</small>
+                    </div>
+                    {% if notification.link %}
+                        <a href="{{ notification.link }}" class="btn btn-primary" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">Take Action</a>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 3rem;">
+            <p style="color: var(--text-muted);">No notifications yet.</p>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .notification-item.unread {
+        background: rgba(var(--primary-rgb), 0.05);
+        border-left: 3px solid var(--primary);
+    }
+    .notification-message.bold {
+        font-weight: 600;
+    }
+    .notification-message {
+        font-weight: 400;
+    }
+</style>
+{% endblock %}

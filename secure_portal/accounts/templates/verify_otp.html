@@ -1,6 +1,24 @@
-<h2>OTP Verification</h2>
-<form method="POST">
-    {% csrf_token %}
-    <input type="text" name="otp" placeholder="Enter OTP" required><br><br>
-    <button type="submit">Verify OTP</button>
-</form>
+{% extends 'base.html' %}
+{% block title %}Verify OTP - Secure Portal{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="card-glass">
+        <div class="page-header">
+            <h2>Two-Factor Authentication</h2>
+            <p>Enter the code sent to your email</p>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="id_otp" class="form-label">One-Time Password</label>
+                <input type="text" name="otp" id="id_otp" class="form-control" placeholder="Enter 6-digit OTP" required style="letter-spacing: 0.2rem; font-weight: bold; text-align: center;">
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Verify Identity</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

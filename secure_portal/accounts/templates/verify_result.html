@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Verify Result - Secure Portal{% endblock %}
+
+{% block content %}
+<div class="auth-container" style="max-width: 600px;">
+    {% if success %}
+        <div class="card-glass" style="border-color: var(--success); text-align: center;">
+            <div style="font-size: 5rem; color: var(--success); margin-bottom: 1rem;">✅</div>
+            <h2 style="color: var(--success);">Verification Successful</h2>
+            <p style="margin-bottom: 2rem;">The digital signature has been validated. The document is authentic and has been released to the student(s).</p>
+            
+            <a href="{% url 'list_offers' %}" class="btn btn-primary btn-block">Back to Verification Center</a>
+        </div>
+    {% else %}
+        <div class="card-glass" style="border-color: var(--danger); text-align: center;">
+            <div style="font-size: 5rem; color: var(--danger); margin-bottom: 1rem;">❌</div>
+            <h2 style="color: var(--danger);">Verification Failed</h2>
+            <p style="margin-bottom: 2rem; color: var(--text-main);">{{ error_message }}</p>
+            
+            <a href="{% url 'list_offers' %}" class="btn btn-secondary btn-block">Back to Verification Center</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
